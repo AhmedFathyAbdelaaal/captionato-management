@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Captionato — Task Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Plus+Jakarta+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- ============ Password gate (full-bleed, shown until authenticated) ============ -->
+  <div id="gate" class="gate" hidden>
+    <div class="gate-inner">
+      <div class="gate-wordmark">Captionato</div>
+      <p class="gate-sub">Internal task manager</p>
+      <div class="gate-form">
+        <input type="password" id="gate-passphrase" placeholder="Team passphrase"
+               autocomplete="current-password" aria-label="Team passphrase">
+        <button id="gate-submit" class="btn btn-primary">Enter</button>
+      </div>
+      <p id="gate-error" class="gate-error" hidden>Incorrect passphrase</p>
+    </div>
+  </div>
+
+  <!-- ============ App shell ============ -->
+  <div id="app" hidden>
+
+    <header class="app-header">
+      <div class="app-name">Captionato <span class="app-name-sub">/ tasks</span></div>
+      <button id="lock-btn" class="btn btn-ghost">Lock</button>
+    </header>
+
+    <nav class="tab-bar" role="tablist" aria-label="Task views">
+      <button class="tab is-active" data-view="dashboard"    role="tab">Dashboard</button>
+      <button class="tab" data-view="unassigned"   role="tab">Unassigned</button>
+      <button class="tab" data-view="ongoing"      role="tab">Ongoing</button>
+      <button class="tab" data-view="done"         role="tab">Done</button>
+      <button class="tab" data-view="under_review" role="tab">Under Review</button>
+    </nav>
+
+    <main class="main">
+      <div class="view-head">
+        <h1 id="view-title">Dashboard</h1>
+        <span id="view-count" class="view-count"></span>
+      </div>
+      <div id="task-list" class="task-list" aria-live="polite"></div>
+      <div id="empty-state" class="empty-state" hidden></div>
+    </main>
+
+    <!-- Always-visible Add Task trigger -->
+    <button id="add-task-btn" class="add-task-fab">+ Add Task</button>
+
+    <!-- ============ Add Task modal ============ -->
+    <div id="modal-backdrop" class="modal-backdrop" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <h2 id="modal-title">Add a task</h2>
+        <p class="modal-sub">New tasks go to Under Review until someone accepts them.</p>
+
+        <label class="field">
+          <span class="field-label">Task name</span>
+          <input type="text" id="f-name" maxlength="200" placeholder="Short title">
+        </label>
+
+        <label class="field">
+          <span class="field-label">Description <em>(optional)</em></span>
+          <textarea id="f-description" rows="4" placeholder="What needs doing, and any context"></textarea>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Category color</span>
+          <div class="color-row">
+            <input type="text" id="f-color" value="#9E2A2B" placeholder="#9E2A2B" spellcheck="false">
+            <span id="f-swatch" class="swatch" style="background:#9E2A2B"></span>
+          </div>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Submitted by</span>
+          <input type="text" id="f-submitted-by" maxlength="100" placeholder="Your name">
+        </label>
+
+        <p id="modal-error" class="form-error" hidden></p>
+
+        <div class="modal-actions">
+          <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
+          <button id="modal-submit" class="btn btn-primary">Submit for review</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,491 @@
+/* ============================================================
+   Captionato Task Manager — style.css
+   Design system per PRD §11: warm off-whites, deep dusty reds,
+   Sora / Plus Jakarta Sans / DM Mono. No gradients, subtle
+   shadows, generous whitespace.
+   ============================================================ */
+
+:root {
+  --bg-base:        #FAF7F5;
+  --bg-surface:     #F2EDEA;
+  --bg-surface-2:   #E8E0DC;
+  --accent-primary: #9E2A2B;
+  --accent-soft:    #C97B7B;
+  --accent-muted:   #E8BFBF;
+  --text-primary:   #1A1018;
+  --text-secondary: #5C4D4D;
+  --text-tertiary:  #9E8A8A;
+  --border:         #DDD3CF;
+
+  --font-display: 'Sora', sans-serif;
+  --font-body:    'Plus Jakarta Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+
+  --radius: 4px;
+  --shadow: 0 1px 3px rgba(26, 16, 24, 0.06);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+[hidden] { display: none !important; }
+
+button { font: inherit; cursor: pointer; }
+
+/* ---------------------------------------------------- buttons */
+
+.btn {
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 9px 18px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--accent-primary);
+  color: var(--bg-base);
+}
+.btn-primary:hover { background: #872425; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+.btn-ghost:hover { background: var(--bg-surface-2); }
+
+.btn:focus-visible,
+.tab:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------- gate */
+
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gate-inner { text-align: center; width: min(360px, 88vw); }
+
+.gate-wordmark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+}
+
+.gate-sub {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  margin: 6px 0 32px;
+}
+
+.gate-form { display: flex; gap: 8px; }
+
+.gate-form input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  font: inherit;
+  color: var(--text-primary);
+}
+
+.gate-error {
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-primary);
+}
+
+/* ---------------------------------------------------- header + tabs */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-base);
+}
+
+.app-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.app-name-sub {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-base);
+  overflow-x: auto;
+}
+
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.tab:hover { color: var(--text-primary); }
+
+.tab.is-active {
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
+}
+
+/* ---------------------------------------------------- main + view head */
+
+.main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 28px 120px;
+}
+
+.view-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.view-head h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.view-count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.empty-state {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+/* ---------------------------------------------------- task cards */
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.task-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-soft); /* overridden inline per task */
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.card-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+/* status badges — DM Mono, uppercase, soft tint per status */
+.badge {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.badge-unassigned   { background: var(--bg-surface-2); color: var(--text-secondary); }
+.badge-ongoing      { background: var(--accent-muted); color: var(--accent-primary); }
+.badge-done         { background: #DCE5D8; color: #3E5C3E; }
+.badge-under_review { background: #EBDFC8; color: #7A5C1E; }
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.card-assignee { color: var(--text-secondary); }
+.card-assignee.is-empty { color: var(--text-tertiary); }
+
+.card-desc {
+  margin-top: 10px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: pointer;
+}
+.card-desc.is-expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.card-actions .btn { padding: 6px 14px; font-size: 13px; }
+
+.updates-link {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 6px 2px;
+}
+.updates-link:hover { color: var(--accent-primary); }
+
+/* ---------------------------------------------------- claim inline prompt */
+
+.claim-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.claim-row input {
+  flex: 1;
+  max-width: 260px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-base);
+  font: inherit;
+  font-size: 13px;
+}
+
+/* ---------------------------------------------------- updates thread */
+
+.thread {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.thread-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.thread-item { font-size: 14px; }
+
+.thread-item-head {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  margin-bottom: 2px;
+}
+
+.thread-item-head .thread-author { color: var(--text-secondary); }
+
+.thread-empty {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 14px;
+}
+
+.thread-form { display: flex; flex-direction: column; gap: 8px; }
+
+.thread-form input,
+.thread-form textarea {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-base);
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.thread-form input { max-width: 260px; }
+.thread-form textarea { resize: vertical; min-height: 56px; }
+
+.thread-form .btn { align-self: flex-start; }
+
+/* ---------------------------------------------------- add task FAB */
+
+.add-task-fab {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 40;
+  background: var(--accent-primary);
+  color: var(--bg-base);
+  border: none;
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(26, 16, 24, 0.18);
+  transition: background-color 0.15s ease;
+}
+.add-task-fab:hover { background: #872425; }
+
+/* ---------------------------------------------------- modal */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(26, 16, 24, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal {
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: min(480px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+}
+
+.modal h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
+}
+
+.modal-sub {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 4px 0 20px;
+}
+
+.field { display: block; margin-bottom: 16px; }
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.field-label em { font-style: normal; color: var(--text-tertiary); font-weight: 400; }
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.field textarea { resize: vertical; }
+
+.color-row { display: flex; align-items: center; gap: 10px; }
+.color-row input { flex: 1; font-family: var(--font-mono); }
+
+.swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.form-error {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-primary);
+  margin-bottom: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ---------------------------------------------------- misc */
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
