@@ -25,6 +25,26 @@
   --shadow: 0 1px 3px rgba(26, 16, 24, 0.06);
 }
 
+/* ---------------------------------------------------- dark mode */
+
+html[data-theme="dark"] {
+  --bg-base:        #1A1018;
+  --bg-surface:     #241C22;
+  --bg-surface-2:   #2E252C;
+  --accent-primary: #C94F50;
+  --accent-soft:    #7A3535;
+  --accent-muted:   #3D2020;
+  --text-primary:   #F2EDEA;
+  --text-secondary: #C4AFAF;
+  --text-tertiary:  #8A7070;
+  --border:         #3D2E2E;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .badge-done         { background: #1E3020; color: #7AA87A; }
+html[data-theme="dark"] .badge-under_review { background: #2E2010; color: #C9A050; }
+html[data-theme="dark"] .btn-primary:hover  { background: #AE3E3F; }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body { height: 100%; }
@@ -66,6 +86,16 @@ button { font: inherit; cursor: pointer; }
 }
 .btn-ghost:hover { background: var(--bg-surface-2); }
 
+.btn-danger {
+  background: transparent;
+  color: #b33333;
+  border-color: #b33333;
+}
+.btn-danger:hover { background: rgba(179, 51, 51, 0.1); }
+
+html[data-theme="dark"] .btn-danger             { color: #e07070; border-color: #e07070; }
+html[data-theme="dark"] .btn-danger:hover       { background: rgba(224, 112, 112, 0.12); }
+
 .btn:focus-visible,
 .tab:focus-visible,
 input:focus-visible,
@@ -73,6 +103,20 @@ textarea:focus-visible {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
+
+/* ---------------------------------------------------- theme toggle */
+
+.theme-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 7px 11px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1;
+  transition: background-color 0.15s ease;
+}
+.theme-btn:hover { background: var(--bg-surface-2); }
 
 /* ---------------------------------------------------- gate */
 
@@ -134,6 +178,12 @@ textarea:focus-visible {
   background: var(--bg-base);
 }
 
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .app-name {
   font-family: var(--font-display);
   font-weight: 600;
@@ -178,7 +228,7 @@ textarea:focus-visible {
 /* ---------------------------------------------------- main + view head */
 
 .main {
-  max-width: 880px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 32px 28px 120px;
 }
@@ -212,12 +262,13 @@ textarea:focus-visible {
   font-size: 14px;
 }
 
-/* ---------------------------------------------------- task cards */
+/* ---------------------------------------------------- task cards grid */
 
 .task-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 14px;
+  align-items: start;
 }
 
 .task-card {
@@ -227,6 +278,17 @@ textarea:focus-visible {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 18px 20px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.task-card:hover {
+  box-shadow: 0 3px 10px rgba(26, 16, 24, 0.12);
+  transform: translateY(-1px);
+}
+
+html[data-theme="dark"] .task-card:hover {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
 }
 
 .card-top {
@@ -239,7 +301,7 @@ textarea:focus-visible {
 .card-name {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.35;
 }
 
@@ -276,16 +338,11 @@ textarea:focus-visible {
 .card-desc {
   margin-top: 10px;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  cursor: pointer;
-}
-.card-desc.is-expanded {
-  display: block;
-  -webkit-line-clamp: unset;
 }
 
 .card-actions {
@@ -295,7 +352,7 @@ textarea:focus-visible {
   margin-top: 14px;
 }
 
-.card-actions .btn { padding: 6px 14px; font-size: 13px; }
+.card-actions .btn { padding: 5px 12px; font-size: 12px; }
 
 .updates-link {
   background: none;
@@ -305,20 +362,23 @@ textarea:focus-visible {
   color: var(--text-secondary);
   text-decoration: underline;
   text-underline-offset: 3px;
-  padding: 6px 2px;
+  padding: 5px 2px;
 }
 .updates-link:hover { color: var(--accent-primary); }
 
 /* ---------------------------------------------------- claim inline prompt */
 
+.claim-slot { margin-top: 12px; }
+
 .claim-row {
   display: flex;
   gap: 8px;
-  margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 .claim-row input {
   flex: 1;
+  min-width: 120px;
   max-width: 260px;
   padding: 6px 10px;
   border: 1px solid var(--border);
@@ -326,6 +386,7 @@ textarea:focus-visible {
   background: var(--bg-base);
   font: inherit;
   font-size: 13px;
+  color: var(--text-primary);
 }
 
 /* ---------------------------------------------------- updates thread */
@@ -397,14 +458,15 @@ textarea:focus-visible {
   transition: background-color 0.15s ease;
 }
 .add-task-fab:hover { background: #872425; }
+html[data-theme="dark"] .add-task-fab:hover { background: #AE3E3F; }
 
-/* ---------------------------------------------------- modal */
+/* ---------------------------------------------------- modal (shared) */
 
 .modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(26, 16, 24, 0.35);
+  background: rgba(26, 16, 24, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -483,6 +545,80 @@ textarea:focus-visible {
   gap: 10px;
   margin-top: 4px;
 }
+
+/* ---------------------------------------------------- detail popup */
+
+.detail-modal {
+  width: min(640px, 100%);
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.detail-title-area { flex: 1; min-width: 0; }
+
+.detail-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.detail-close-btn {
+  padding: 6px 10px;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  margin-bottom: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.detail-meta .card-assignee { color: var(--text-secondary); }
+
+.detail-color-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.detail-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+  margin-bottom: 18px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-actions .btn { padding: 7px 16px; font-size: 13px; }
 
 /* ---------------------------------------------------- misc */
 

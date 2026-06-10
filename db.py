@@ -168,6 +168,18 @@ def get_updates(task_id: int) -> list[dict]:
         conn.close()
 
 
+def delete_task(task_id: int) -> bool:
+    """Delete a task and all its updates. Returns True if a row was removed."""
+    conn = get_conn()
+    try:
+        conn.execute("DELETE FROM task_updates WHERE task_id = ?", (task_id,))
+        cur = conn.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+        conn.commit()
+        return cur.rowcount > 0
+    finally:
+        conn.close()
+
+
 def add_update(task_id: int, author: str, content: str) -> dict:
     now = _now()
     conn = get_conn()

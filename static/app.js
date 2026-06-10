@@ -4,11 +4,13 @@
 
    Structure:
      1. Tiny helpers (fetch wrapper, escaping, dates)
-     2. Auth gate
-     3. View switching + rendering
-     4. Card actions (claim / done / accept / updates)
-     5. Add Task modal
-     6. Polling on tab focus
+     2. Dark mode toggle
+     3. Auth gate
+     4. View switching + rendering
+     5. Card actions (claim / done / accept)
+     6. Detail popup (full task view + updates thread + delete)
+     7. Add Task modal
+     8. Polling on tab focus
    ============================================================ */
 
 (function () {
@@ -77,9 +79,36 @@
   };
 
   let currentView = 'dashboard';
-  let openThreads = new Set(); // task ids with thread expanded, survives re-render
+  let tasksCache = []; // kept fresh on every renderTasks; used by detail popup
 
-  // ------------------------------------------------ 2. auth gate
+  // ------------------------------------------------ 2. dark mode
+
+  const themeBtn = $('#theme-btn');
+
+  (function initTheme() {
+    const saved = localStorage.getItem('captionato-theme');
+    if (saved === 'dark') document.documentElement.dataset.theme = 'dark';
+    syncThemeIcon();
+  })();
+
+  function syncThemeIcon() {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    themeBtn.textContent = dark ? '☀' : '☾';
+    themeBtn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  }
+
+  themeBtn.addEventListener('click', () => {
+    if (document.documentElement.dataset.theme === 'dark') {
+      delete document.documentElement.dataset.theme;
+      localStorage.removeItem('captionato-theme');
+    } else {
+      document.documentElement.dataset.theme = 'dark';
+      localStorage.setItem('captionato-theme', 'dark');
+    }
+    syncThemeIcon();
+  });
+
+  // ------------------------------------------------ 3. auth gate
 
   const gate = $('#gate');
   const appEl = $('#app');
@@ -143,7 +172,7 @@
     }
   })();
 
-  // ------------------------------------------------ 3. views + rendering
+  // ------------------------------------------------ 4. views + rendering
 
   const listEl = $('#task-list');
   const emptyEl = $('#empty-state');
@@ -153,7 +182,6 @@
       currentView = tab.dataset.view;
       document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('is-active', t === tab));
       $('#view-title').textContent = VIEWS[currentView].title;
-      openThreads = new Set();
       refresh();
     });
   });
@@ -166,7 +194,7 @@
       if (view.statuses.length === 1) {
         tasks = await api(`/api/tasks?status=${view.statuses[0]}`);
       } else {
-        // Dashboard: fetch all, filter client-side, unassigned first (PRD §6).
+        // Dashboard: fetch all, filter client-side, unassigned first.
         const all = await api('/api/tasks');
         tasks = all.filter((t) => view.statuses.includes(t.status));
         tasks.sort((a, b) => {
@@ -194,23 +222,23 @@
   };
 
   function renderTasks(tasks) {
+    tasksCache = tasks;
     $('#view-count').textContent = tasks.length === 1 ? '1 task' : `${tasks.length} tasks`;
 
     if (!tasks.length) {
       listEl.innerHTML = '';
       emptyEl.textContent = EMPTY_COPY[currentView];
       emptyEl.hidden = false;
-      return;
+    } else {
+      emptyEl.hidden = true;
+      listEl.innerHTML = tasks.map(cardHTML).join('');
     }
-    emptyEl.hidden = true;
 
-    listEl.innerHTML = tasks.map(cardHTML).join('');
-
-    // Re-open any threads that were open before the re-render.
-    openThreads.forEach((id) => {
-      const card = listEl.querySelector(`.task-card[data-id="${id}"]`);
-      if (card) openThread(card, id, false);
-    });
+    // If the detail popup is open for a task that no longer exists, close it.
+    if (!detailBackdrop.hidden) {
+      const openId = Number(detailModal.dataset.id);
+      if (!tasks.find((t) => t.id === openId)) closeDetailPopup();
+    }
   }
 
   function cardHTML(t) {
@@ -229,16 +257,13 @@
 
     const actions = [];
     if (t.status === 'unassigned') {
-      actions.push('<button class="btn btn-primary act-claim">Claim Task</button>');
+      actions.push('<button class="btn btn-primary act-claim">Claim</button>');
     }
     if (t.status === 'ongoing') {
-      actions.push('<button class="btn btn-primary act-done">Mark as Done</button>');
+      actions.push('<button class="btn btn-primary act-done">Mark Done</button>');
     }
     if (t.status === 'under_review') {
       actions.push('<button class="btn btn-primary act-accept">Accept</button>');
-    }
-    if (t.status === 'ongoing' || t.status === 'done') {
-      actions.push('<button class="btn btn-ghost act-add-update">Add Update</button>');
     }
     if (t.updates_count > 0) {
       actions.push(`<button class="updates-link act-view-updates">${updatesLabel}</button>`);
@@ -255,24 +280,20 @@
           ${assignee}
           ${submitted}
         </div>
-        ${t.description ? `<p class="card-desc" title="Click to expand">${esc(t.description)}</p>` : ''}
+        ${t.description ? `<p class="card-desc">${esc(t.description)}</p>` : ''}
         <div class="card-actions">${actions.join('')}</div>
         <div class="claim-slot"></div>
-        <div class="thread-slot"></div>
       </article>`;
   }
 
-  // ------------------------------------------------ 4. card actions
+  // ------------------------------------------------ 5. card actions
 
   listEl.addEventListener('click', async (e) => {
     const card = e.target.closest('.task-card');
     if (!card) return;
     const id = Number(card.dataset.id);
 
-    if (e.target.classList.contains('card-desc')) {
-      e.target.classList.toggle('is-expanded');
-      return;
-    }
+    // Inline claim buttons — handle without opening popup
     if (e.target.classList.contains('act-claim')) {
       showClaimPrompt(card, id);
       return;
@@ -285,16 +306,14 @@
       await patchTask(id, { status: 'unassigned' });
       return;
     }
-    if (e.target.classList.contains('act-view-updates') ||
-        e.target.classList.contains('act-add-update')) {
-      const slot = card.querySelector('.thread-slot');
-      if (slot.childElementCount && !e.target.classList.contains('act-add-update')) {
-        slot.innerHTML = '';
-        openThreads.delete(id);
-      } else {
-        await openThread(card, id, e.target.classList.contains('act-add-update'));
-      }
+    // Claim slot internal interactions (confirm/cancel/input) — don't open popup
+    if (e.target.closest('.claim-slot')) {
+      return;
     }
+    // Everything else: card body, description, updates link → open detail popup
+    const focusThread = e.target.classList.contains('act-add-update') ||
+                        e.target.classList.contains('act-view-updates');
+    await openDetailPopup(id, focusThread);
   });
 
   async function patchTask(id, body) {
@@ -306,7 +325,7 @@
     }
   }
 
-  // --- claim inline prompt (PRD §9)
+  // --- claim inline prompt on card
 
   function showClaimPrompt(card, id) {
     const slot = card.querySelector('.claim-slot');
@@ -329,22 +348,176 @@
     };
 
     slot.querySelector('.claim-confirm').addEventListener('click', confirm);
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') confirm(); });
+    input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') confirm(); });
     slot.querySelector('.claim-cancel').addEventListener('click', () => { slot.innerHTML = ''; });
   }
 
-  // --- updates thread (PRD §10)
+  // ------------------------------------------------ 6. detail popup
 
-  async function openThread(card, id, focusInput) {
-    const slot = card.querySelector('.thread-slot');
+  const detailBackdrop = $('#detail-backdrop');
+  const detailModal = $('#detail-modal');
+
+  async function openDetailPopup(id, focusThread = false) {
+    const task = tasksCache.find((t) => t.id === id);
+    if (!task) return;
+
+    const color = /^#[0-9a-fA-F]{3,8}$/.test(task.category_color || '')
+      ? task.category_color : 'var(--accent-soft)';
+
+    // Title + badge
+    detailModal.dataset.id = id;
+    $('#detail-modal-title').textContent = task.name;
+    $('#detail-badge').innerHTML =
+      `<span class="badge badge-${esc(task.status)}">${STATUS_LABELS[task.status] || esc(task.status)}</span>`;
+
+    // Meta row
+    const assignee = task.status === 'unassigned'
+      ? '<span class="card-assignee is-empty">Unclaimed</span>'
+      : task.assigned_to
+        ? `<span class="card-assignee">→ ${esc(task.assigned_to)}</span>`
+        : '';
+    const submitted = task.submitted_by
+      ? `<span>Submitted by ${esc(task.submitted_by)}</span>`
+      : '';
+    const colorMeta = task.category_color
+      ? `<span><span class="detail-color-swatch" style="background:${esc(color)}"></span>${esc(task.category_color)}</span>`
+      : '';
+    $('#detail-meta').innerHTML = `
+      <span>${fmtDate(task.created_at)}</span>
+      ${assignee}
+      ${submitted}
+      ${colorMeta}`;
+
+    // Description
+    const descEl = $('#detail-description');
+    if (task.description) {
+      descEl.textContent = task.description;
+      descEl.hidden = false;
+    } else {
+      descEl.textContent = '';
+      descEl.hidden = true;
+    }
+
+    // Action buttons
+    const actions = [];
+    if (task.status === 'unassigned') {
+      actions.push('<button class="btn btn-primary det-claim">Claim Task</button>');
+    }
+    if (task.status === 'ongoing') {
+      actions.push('<button class="btn btn-primary det-done">Mark as Done</button>');
+    }
+    if (task.status === 'under_review') {
+      actions.push('<button class="btn btn-primary det-accept">Accept</button>');
+    }
+    if (task.status === 'ongoing' || task.status === 'done') {
+      actions.push('<button class="btn btn-ghost det-add-update">Add Update</button>');
+    }
+    actions.push('<button class="btn btn-danger det-delete">Delete</button>');
+    $('#detail-actions').innerHTML = actions.join('');
+
+    // Reset slots
+    $('#detail-claim-slot').innerHTML = '';
+    $('#detail-thread-slot').innerHTML = '<p class="thread-empty" style="margin-top:14px">Loading updates…</p>';
+
+    // Show popup
+    detailBackdrop.hidden = false;
+    detailModal.scrollTop = 0;
+
+    // Load thread
+    await loadThread($('#detail-thread-slot'), id, task.status, focusThread);
+  }
+
+  function closeDetailPopup() {
+    detailBackdrop.hidden = true;
+    $('#detail-thread-slot').innerHTML = '';
+    $('#detail-claim-slot').innerHTML = '';
+  }
+
+  detailBackdrop.addEventListener('click', async (e) => {
+    if (e.target === detailBackdrop) { closeDetailPopup(); return; }
+
+    const id = Number(detailModal.dataset.id);
+
+    if (e.target.id === 'detail-close') {
+      closeDetailPopup();
+      return;
+    }
+    if (e.target.classList.contains('det-claim')) {
+      showClaimPromptInDetail(id);
+      return;
+    }
+    if (e.target.classList.contains('det-done')) {
+      await patchTask(id, { status: 'done' });
+      closeDetailPopup();
+      return;
+    }
+    if (e.target.classList.contains('det-accept')) {
+      await patchTask(id, { status: 'unassigned' });
+      closeDetailPopup();
+      return;
+    }
+    if (e.target.classList.contains('det-add-update')) {
+      const nameInput = $('#detail-thread-slot').querySelector('.thread-name');
+      if (nameInput) {
+        nameInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        nameInput.focus();
+      }
+      return;
+    }
+    if (e.target.classList.contains('det-delete')) {
+      const taskName = $('#detail-modal-title').textContent;
+      if (!confirm(`Delete "${taskName}"? This cannot be undone.`)) return;
+      try {
+        await api(`/api/tasks/${id}`, { method: 'DELETE' });
+        closeDetailPopup();
+        refresh();
+      } catch (err) {
+        alert(err.message);
+      }
+      return;
+    }
+  });
+
+  // --- claim prompt inside detail popup
+
+  function showClaimPromptInDetail(id) {
+    const slot = $('#detail-claim-slot');
+    if (slot.childElementCount) { slot.querySelector('input').focus(); return; }
+
+    slot.innerHTML = `
+      <div class="claim-row">
+        <input type="text" placeholder="Your name" maxlength="100" aria-label="Your name">
+        <button class="btn btn-primary claim-confirm">Claim</button>
+        <button class="btn btn-ghost claim-cancel">Cancel</button>
+      </div>`;
+
+    const input = slot.querySelector('input');
+    input.focus();
+
+    const doConfirm = async () => {
+      const name = input.value.trim();
+      if (!name) { input.focus(); return; }
+      await patchTask(id, { status: 'ongoing', assigned_to: name });
+      closeDetailPopup();
+    };
+
+    slot.querySelector('.claim-confirm').addEventListener('click', doConfirm);
+    input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') doConfirm(); });
+    slot.querySelector('.claim-cancel').addEventListener('click', () => { slot.innerHTML = ''; });
+  }
+
+  // --- updates thread (used by the detail popup)
+
+  async function loadThread(slot, id, status, focusInput) {
     let updates = [];
     try {
       updates = await api(`/api/tasks/${id}/updates`);
     } catch (err) {
-      if (err.message !== 'Unauthorized') alert(err.message);
+      if (err.message !== 'Unauthorized') {
+        slot.innerHTML = '<p class="thread-empty" style="margin-top:14px">Could not load updates.</p>';
+      }
       return;
     }
-    openThreads.add(id);
 
     const items = updates.length
       ? `<div class="thread-list">${updates.map((u) => `
@@ -356,7 +529,6 @@
           </div>`).join('')}</div>`
       : '<p class="thread-empty">No updates yet.</p>';
 
-    const status = card.dataset.status;
     const canAdd = status === 'ongoing' || status === 'done';
 
     slot.innerHTML = `
@@ -383,16 +555,21 @@
             method: 'POST',
             body: JSON.stringify({ author, content }),
           });
+          // Reload thread in-place and refresh the card list
+          await loadThread(slot, id, status, false);
           refresh();
         } catch (err) {
           alert(err.message);
         }
       });
-      if (focusInput) nameInput.focus();
+      if (focusInput) {
+        nameInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        nameInput.focus();
+      }
     }
   }
 
-  // ------------------------------------------------ 5. Add Task modal
+  // ------------------------------------------------ 7. Add Task modal
 
   const backdrop = $('#modal-backdrop');
   const fName = $('#f-name');
@@ -420,11 +597,15 @@
   $('#add-task-btn').addEventListener('click', openModal);
   $('#modal-cancel').addEventListener('click', closeModal);
   backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !backdrop.hidden) closeModal();
+    if (e.key === 'Escape') {
+      if (!backdrop.hidden) closeModal();
+      if (!detailBackdrop.hidden) closeDetailPopup();
+    }
   });
 
-  // Live swatch — the only color validation affordance for v1 (PRD §16).
+  // Live swatch preview
   fColor.addEventListener('input', () => {
     fSwatch.style.background = fColor.value.trim();
   });
@@ -449,7 +630,7 @@
         }),
       });
       closeModal();
-      // Jump to Under Review so the submitter sees their task land (PRD §8).
+      // Jump to Under Review so the submitter sees their task land.
       document.querySelector('.tab[data-view="under_review"]').click();
     } catch (err) {
       showModalError(err.message);
@@ -461,9 +642,8 @@
     modalError.hidden = false;
   }
 
-  // ------------------------------------------------ 6. polling on focus
+  // ------------------------------------------------ 8. polling on focus
 
-  // PRD §15: no real-time push; refetch when the tab regains focus.
   window.addEventListener('focus', refresh);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') refresh();

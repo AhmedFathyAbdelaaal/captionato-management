@@ -159,6 +159,15 @@ def patch_task(task_id):
     return jsonify(updated)
 
 
+@app.delete("/api/tasks/<int:task_id>")
+@login_required
+def delete_task(task_id):
+    if db.get_task(task_id) is None:
+        return jsonify({"error": "Task not found"}), 404
+    db.delete_task(task_id)
+    return jsonify({"ok": True})
+
+
 # --------------------------------------------------------- updates API
 
 @app.get("/api/tasks/<int:task_id>/updates")

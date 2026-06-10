@@ -30,7 +30,10 @@
 
     <header class="app-header">
       <div class="app-name">Captionato <span class="app-name-sub">/ tasks</span></div>
-      <button id="lock-btn" class="btn btn-ghost">Lock</button>
+      <div class="app-header-right">
+        <button id="theme-btn" class="theme-btn" title="Switch to dark mode">☾</button>
+        <button id="lock-btn" class="btn btn-ghost">Lock</button>
+      </div>
     </header>
 
     <nav class="tab-bar" role="tablist" aria-label="Task views">
@@ -88,6 +91,24 @@
           <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
           <button id="modal-submit" class="btn btn-primary">Submit for review</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ============ Task Detail popup ============ -->
+    <div id="detail-backdrop" class="modal-backdrop" hidden>
+      <div id="detail-modal" class="modal detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+        <div class="detail-header">
+          <div class="detail-title-area">
+            <h2 id="detail-modal-title" class="detail-title"></h2>
+            <div id="detail-badge"></div>
+          </div>
+          <button id="detail-close" class="btn btn-ghost detail-close-btn">✕</button>
+        </div>
+        <div id="detail-meta" class="detail-meta"></div>
+        <div id="detail-description" class="detail-description"></div>
+        <div id="detail-actions" class="detail-actions"></div>
+        <div id="detail-claim-slot" class="claim-slot"></div>
+        <div id="detail-thread-slot"></div>
       </div>
     </div>
 
