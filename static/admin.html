@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Captionato — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600&family=Plus+Jakarta+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="app-name">Captionato <span class="app-name-sub">/ admin</span></div>
+    <div class="app-header-right">
+      <a href="/" class="btn btn-ghost" style="font-size:13px;padding:7px 13px">← Tasks</a>
+      <span id="username-display" class="username-display"></span>
+      <button id="theme-btn" class="theme-btn" title="Switch to dark mode">☾</button>
+      <button id="lock-btn" class="btn btn-ghost">Lock</button>
+    </div>
+  </header>
+
+  <!-- Admin section tabs -->
+  <nav class="admin-tabs tab-bar" role="tablist" aria-label="Admin sections">
+    <button class="tab is-active" data-section="users"        role="tab">Users</button>
+    <button class="tab"           data-section="invite-codes" role="tab">Invite Codes</button>
+    <button class="tab"           data-section="tasks"        role="tab">Tasks</button>
+    <button class="tab"           data-section="audit"        role="tab">Audit Log</button>
+    <button class="tab"           data-section="export"       role="tab">Export</button>
+  </nav>
+
+  <!-- ========= Users ========= -->
+  <div id="panel-users" class="admin-section admin-content-panel is-active">
+    <div class="admin-section-title">Users</div>
+    <div id="users-table-wrap" class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Registered</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr><td colspan="4" class="dim" style="text-align:center;padding:24px">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========= Invite Codes ========= -->
+  <div id="panel-invite-codes" class="admin-section admin-content-panel">
+    <div class="admin-section-title">Invite Codes</div>
+    <div class="admin-toolbar">
+      <input type="text" id="new-code-input" placeholder="Code (leave blank to auto-generate)"
+             style="flex:1;min-width:200px;max-width:320px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-surface);font:inherit;font-size:14px;color:var(--text-primary)">
+      <button id="gen-code-btn" class="btn btn-primary">Generate Code</button>
+    </div>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Created by</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="codes-tbody">
+          <tr><td colspan="5" class="dim" style="text-align:center;padding:24px">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========= Tasks ========= -->
+  <div id="panel-tasks" class="admin-section admin-content-panel">
+    <div class="admin-section-title">Task Management</div>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Assigned to</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tasks-tbody">
+          <tr><td colspan="5" class="dim" style="text-align:center;padding:24px">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========= Audit Log ========= -->
+  <div id="panel-audit" class="admin-section admin-content-panel">
+    <div class="admin-section-title">Audit Log</div>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Target</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody id="audit-tbody">
+          <tr><td colspan="5" class="dim" style="text-align:center;padding:24px">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="audit-pagination" class="pagination"></div>
+  </div>
+
+  <!-- ========= Export ========= -->
+  <div id="panel-export" class="admin-section admin-content-panel">
+    <div class="admin-section-title">Export Tasks</div>
+    <div class="admin-toolbar">
+      <select id="export-status" class="field-select" style="max-width:200px">
+        <option value="">All statuses</option>
+        <option value="unassigned">Unassigned</option>
+        <option value="ongoing">Ongoing</option>
+        <option value="done">Done</option>
+        <option value="under_review">Under Review</option>
+      </select>
+      <a id="export-btn" class="btn btn-primary" href="/admin/export" target="_blank">Export to Markdown</a>
+    </div>
+    <p style="font-size:13px;color:var(--text-tertiary)">
+      Downloads a <code>.md</code> file with all tasks matching the selected status filter,
+      including assignees and update threads.
+    </p>
+  </div>
+
+  <script src="/static/admin.js"></script>
+</body>
+</html>

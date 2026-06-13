@@ -625,3 +625,243 @@ html[data-theme="dark"] .add-task-fab:hover { background: #AE3E3F; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+/* ---------------------------------------------------- gate v2 (login + register) */
+
+.gate-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gate-form-stack input {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  font: inherit;
+  color: var(--text-primary);
+}
+
+.gate-switch {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.gate-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: var(--accent-primary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.gate-link:hover { color: #7A1D1E; }
+html[data-theme="dark"] .gate-link:hover { color: #E07070; }
+
+/* ---------------------------------------------------- header v2 */
+
+.view-mode-group {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.view-mode-btn {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 7px 13px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.view-mode-btn:hover { background: var(--bg-surface-2); }
+.view-mode-btn.is-active {
+  background: var(--accent-primary);
+  color: var(--bg-base);
+}
+html[data-theme="dark"] .view-mode-btn.is-active { background: var(--accent-primary); }
+
+.username-display {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-tertiary);
+  padding: 0 4px;
+}
+
+.admin-nav-btn {
+  font-size: 13px;
+  padding: 7px 13px;
+}
+
+/* ---------------------------------------------------- My Tasks section headers */
+
+.task-section-header {
+  grid-column: 1 / -1;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 6px 0 4px;
+  margin-top: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.task-section-header:first-child { margin-top: 0; }
+
+/* ---------------------------------------------------- assignee + co badge on cards */
+
+.co-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--accent-muted);
+  color: var(--accent-primary);
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.coop-icon {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+/* ---------------------------------------------------- assign modal */
+
+.field-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.co-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  background: var(--bg-surface);
+}
+
+.co-check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.co-check-row input[type=checkbox] { accent-color: var(--accent-primary); }
+
+/* ---------------------------------------------------- admin panel shared table styles */
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text-primary);
+}
+
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: var(--bg-surface-2); }
+
+.admin-table .mono { font-family: var(--font-mono); font-size: 12px; }
+.admin-table .dim  { color: var(--text-tertiary); font-size: 13px; }
+
+.admin-table .btn { padding: 4px 10px; font-size: 12px; }
+
+.table-wrap {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+/* ---------------------------------------------------- admin nav tabs */
+
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-base);
+  overflow-x: auto;
+}
+
+.admin-section {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 28px 80px;
+}
+
+.admin-section-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-content-panel { display: none; }
+.admin-content-panel.is-active { display: block; }
+
+/* ---------------------------------------------------- pagination */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+.pagination .btn { padding: 5px 12px; font-size: 12px; }

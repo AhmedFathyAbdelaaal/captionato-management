@@ -11,18 +11,41 @@
 </head>
 <body>
 
-  <!-- ============ Password gate (full-bleed, shown until authenticated) ============ -->
+  <!-- ============ Auth gate (full-bleed, shown until authenticated) ============ -->
   <div id="gate" class="gate" hidden>
-    <div class="gate-inner">
+
+    <!-- Login form -->
+    <div id="gate-login" class="gate-inner">
       <div class="gate-wordmark">Captionato</div>
       <p class="gate-sub">Internal task manager</p>
-      <div class="gate-form">
-        <input type="password" id="gate-passphrase" placeholder="Team passphrase"
-               autocomplete="current-password" aria-label="Team passphrase">
+      <div class="gate-form gate-form-stack">
+        <input type="text" id="gate-username" placeholder="Username"
+               autocomplete="username" aria-label="Username">
+        <input type="password" id="gate-password" placeholder="Password"
+               autocomplete="current-password" aria-label="Password">
         <button id="gate-submit" class="btn btn-primary">Enter</button>
       </div>
-      <p id="gate-error" class="gate-error" hidden>Incorrect passphrase</p>
+      <p id="gate-error" class="gate-error" hidden></p>
+      <p class="gate-switch">No account? <button id="show-register" class="gate-link">Register</button></p>
     </div>
+
+    <!-- Register form (hidden by default) -->
+    <div id="gate-register" class="gate-inner" hidden>
+      <div class="gate-wordmark">Captionato</div>
+      <p class="gate-sub">Create an account</p>
+      <div class="gate-form gate-form-stack">
+        <input type="text" id="reg-username" placeholder="Username"
+               autocomplete="username" aria-label="Username">
+        <input type="password" id="reg-password" placeholder="Password"
+               autocomplete="new-password" aria-label="Password">
+        <input type="text" id="reg-invite" placeholder="Invite code"
+               autocomplete="off" aria-label="Invite code">
+        <button id="reg-submit" class="btn btn-primary">Register</button>
+      </div>
+      <p id="reg-error" class="gate-error" hidden></p>
+      <p class="gate-switch"><button id="show-login" class="gate-link">← Back to login</button></p>
+    </div>
+
   </div>
 
   <!-- ============ App shell ============ -->
@@ -31,6 +54,12 @@
     <header class="app-header">
       <div class="app-name">Captionato <span class="app-name-sub">/ tasks</span></div>
       <div class="app-header-right">
+        <div class="view-mode-group" role="group" aria-label="Task view">
+          <button id="btn-my-tasks" class="view-mode-btn is-active">My Tasks</button>
+          <button id="btn-all-tasks" class="view-mode-btn">All Tasks</button>
+        </div>
+        <a id="admin-link" href="/admin" class="btn btn-ghost admin-nav-btn" hidden>Admin</a>
+        <span id="username-display" class="username-display"></span>
         <button id="theme-btn" class="theme-btn" title="Switch to dark mode">☾</button>
         <button id="lock-btn" class="btn btn-ghost">Lock</button>
       </div>
@@ -46,14 +75,13 @@
 
     <main class="main">
       <div class="view-head">
-        <h1 id="view-title">Dashboard</h1>
+        <h1 id="view-title">My Tasks</h1>
         <span id="view-count" class="view-count"></span>
       </div>
       <div id="task-list" class="task-list" aria-live="polite"></div>
       <div id="empty-state" class="empty-state" hidden></div>
     </main>
 
-    <!-- Always-visible Add Task trigger -->
     <button id="add-task-btn" class="add-task-fab">+ Add Task</button>
 
     <!-- ============ Add Task modal ============ -->
@@ -80,16 +108,60 @@
           </div>
         </label>
 
-        <label class="field">
-          <span class="field-label">Submitted by</span>
-          <input type="text" id="f-submitted-by" maxlength="100" placeholder="Your name">
-        </label>
-
         <p id="modal-error" class="form-error" hidden></p>
 
         <div class="modal-actions">
           <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
           <button id="modal-submit" class="btn btn-primary">Submit for review</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Assign modal (admin only) ============ -->
+    <div id="assign-backdrop" class="modal-backdrop" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="assign-title">
+        <h2 id="assign-title">Assign task</h2>
+        <p class="modal-sub">Set the primary owner and optional co-assignees.</p>
+
+        <label class="field">
+          <span class="field-label">Primary assignee</span>
+          <select id="assign-primary" class="field-select">
+            <option value="">— Select a user —</option>
+          </select>
+        </label>
+
+        <div class="field">
+          <span class="field-label">Co-assignees <em>(optional)</em></span>
+          <div id="assign-co-list" class="co-checklist"></div>
+        </div>
+
+        <p id="assign-error" class="form-error" hidden></p>
+
+        <div class="modal-actions">
+          <button id="assign-cancel" class="btn btn-ghost">Cancel</button>
+          <button id="assign-confirm" class="btn btn-primary">Assign</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Add Cooperator modal ============ -->
+    <div id="coop-backdrop" class="modal-backdrop" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="coop-title">
+        <h2 id="coop-title">Add cooperator</h2>
+        <p class="modal-sub">Select a registered user to add as a co-assignee.</p>
+
+        <label class="field">
+          <span class="field-label">User</span>
+          <select id="coop-select" class="field-select">
+            <option value="">— Select a user —</option>
+          </select>
+        </label>
+
+        <p id="coop-error" class="form-error" hidden></p>
+
+        <div class="modal-actions">
+          <button id="coop-cancel" class="btn btn-ghost">Cancel</button>
+          <button id="coop-confirm" class="btn btn-primary">Add</button>
         </div>
       </div>
     </div>
