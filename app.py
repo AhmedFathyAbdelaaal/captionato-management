@@ -75,8 +75,12 @@ def admin_required(f):
     def decorated(*args, **kwargs):
         if not session.get("user_id"):
             return jsonify({"error": "Unauthorized"}), 401
-        if session.get("role") != "admin":
+        # Always verify role from DB so promotions/demotions take effect
+        # immediately without requiring the user to re-login.
+        user = db.get_user_by_id(session["user_id"])
+        if not user or user["role"] != "admin":
             return jsonify({"error": "Forbidden"}), 403
+        session["role"] = user["role"]  # keep session in sync
         return f(*args, **kwargs)
     return decorated
 
